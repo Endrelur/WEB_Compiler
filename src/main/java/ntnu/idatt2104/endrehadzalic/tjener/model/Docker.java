@@ -36,9 +36,9 @@ public class Docker {
         String dockerCommand = "docker run -i --rm oving-image < " + cppPath;
 
         if (os == WINDOWS)
-            return new String[]{"cmd.exe", "/c", dockerCommand};
+            return new String[] {"cmd.exe", "/c", dockerCommand};
         else if (os == LINUX)
-            return new String[]{"/bin/bash", "-c", dockerCommand};
+            return new String[] {"/bin/bash", "-c", dockerCommand};
         else
             throw new IllegalStateException("Unsupported OS");
     }
@@ -49,6 +49,7 @@ public class Docker {
      * @param cppSourceCode the cpp source-code to be compiled
      */
     public static Optional<String> executeInDocker(String cppSourceCode, long timeout) {
+        Process p = null;
         BufferedReader stdOut = null;
         BufferedReader stdErr = null;
         Path path = null;
@@ -65,7 +66,7 @@ public class Docker {
 
             // Launch docker
             ProcessBuilder builder = new ProcessBuilder(commands);
-            Process p = builder.start();
+            p = builder.start();
 
             stdOut = new BufferedReader(new InputStreamReader(p.getInputStream()));
             stdErr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
@@ -83,7 +84,6 @@ public class Docker {
             //  Wait until the process has terminated.
             p.waitFor(timeout, TimeUnit.SECONDS);
             int exitValue = p.exitValue();
-            p.destroy();
 
             output = "Exit Code: " + exitValue + "\n" + result.toString();
         }
@@ -92,12 +92,13 @@ public class Docker {
             output = null;
         }
         catch (InterruptedException e) {
-            output = "Execution was timed out";
+            output = "Error: Execution took too long. Process timed out";
         }
         finally {
-            closeQuietly(stdOut);
-            closeQuietly(stdErr);
-            deleteQuietly(path);
+            if (stdOut != null) closeQuietly(stdOut);
+            if (stdErr != null) closeQuietly(stdErr);
+            if (path != null)   deleteQuietly(path);
+            if (p != null)      p.destroy();
         }
 
         return Optional.ofNullable(output);
@@ -105,16 +106,12 @@ public class Docker {
 
 
     private static void closeQuietly(Closeable closeable) {
-        if (closeable == null)
-            return;
         try {
             closeable.close();
         } catch (IOException e) {}
     }
 
     private static void deleteQuietly(Path path) {
-        if (path == null)
-            return;
         try {
             Files.deleteIfExists(path);
         } catch (IOException e) {}

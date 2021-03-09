@@ -33,9 +33,10 @@ html, body {
 
 #output {
     grid-area:  output;
-    height: 200px;
-    border:     1px solid black;
-    overflow: scroll;
+    height:   200px;
+    border:   1px solid black;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 
@@ -48,8 +49,8 @@ html, body {
             "output run-btn ";
     }
     #run-btn {
-        height: 50px;
-        align-self: center;
+        height:       50px;
+        align-self:   center;
         justify-self: center;
     }
 }
