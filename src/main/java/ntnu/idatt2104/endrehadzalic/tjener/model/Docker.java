@@ -18,7 +18,7 @@ public class Docker {
     public static final int WINDOWS                 = 0;
     public static final int LINUX                   = 1;
 
-    private static final String BASE_PATH           = "/src/main/resources/docker/";
+    private static final String BASE_PATH           = "src/main/resources/docker/";
     private static final String WINDOWS_RUN_SCRIPT  = BASE_PATH + "run.cmd";
     private static final String LINUX_RUN_SCRIPT    = BASE_PATH + "run.sh";
 
@@ -58,7 +58,7 @@ public class Docker {
 
         try {
             // Create a temp-file for holding the cpp source code
-            path = Files.createTempFile(Long.toString(System.nanoTime()), ".cpp");
+            path = Files.createTempFile(null, ".cpp");
             Files.write(path, cppSourceCode.getBytes(StandardCharsets.UTF_8));
 
             // Create docker launch command
@@ -89,6 +89,7 @@ public class Docker {
             output = result.toString();
         }
         catch(IOException | InterruptedException e) {
+            System.err.println("ERROR");
             output = null;
         }
         finally {
