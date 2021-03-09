@@ -1,0 +1,37 @@
+body {
+  background-color: powderblue;
+}
+
+h1 {
+  color: white;
+}
+
+.container {
+  display: grid;
+  grid-template-areas:
+  "header header"
+  "input output"
+  "button info"
+}
+
+textarea {
+  resize: none;
+}
+
+#runbutton{
+  grid-area:button;
+}
+
+#title {
+  grid-area: header;
+}
+
+#codeoutput {
+  grid-area: output;
+  background-color: black;
+  color: green;
+}
+
+#codeinput{
+  grid-area: input;
+}
