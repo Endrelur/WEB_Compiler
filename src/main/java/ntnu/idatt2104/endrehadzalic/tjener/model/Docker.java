@@ -10,27 +10,24 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 
 public class Docker {
 
     public static final int WINDOWS = 0;
-    public static final int LINUX = 1;
-
-    private static final String BASE_PATH = "src/main/resources/docker/";
-    private static final String WINDOWS_RUN_SCRIPT = BASE_PATH + "run.cmd";
-    private static final String LINUX_RUN_SCRIPT = BASE_PATH + "run.sh";
+    public static final int LINUX   = 1;
 
     /**
      * @return -1 if the identified OS is unsupported
      */
     private static int checkOS() {
-        int os = -1;
         if (SystemUtils.IS_OS_WINDOWS)
-            os = WINDOWS;
+            return WINDOWS;
         else if (SystemUtils.IS_OS_LINUX)
-            os = LINUX;
-        return os;
+            return LINUX;
+        else
+            return -1;
     }
 
     private static String[] getLaunchCommand(String cppPath) {
@@ -51,7 +48,7 @@ public class Docker {
      *
      * @param cppSourceCode the cpp source-code to be compiled
      */
-    public static Optional<String> executeInDocker(String cppSourceCode) {
+    public static Optional<String> executeInDocker(String cppSourceCode, long timeout) {
         BufferedReader stdOut = null;
         BufferedReader stdErr = null;
         Path path = null;
@@ -83,18 +80,21 @@ public class Docker {
             for (String line = stdErr.readLine(); line != null; line = stdErr.readLine())
                 result.append(line).append("\n");
 
-            System.out.println("Waiting...");
             //  Wait until the process has terminated.
-            p.waitFor();
-            System.out.println("Finished...");
-            // System.out.println("exit: " + process.exitValue());
+            p.waitFor(timeout, TimeUnit.SECONDS);
+            int exitValue = p.exitValue();
             p.destroy();
 
-            output = result.toString();
-        } catch (IOException | InterruptedException e) {
+            output = "Exit Code: " + exitValue + "\n" + result.toString();
+        }
+        catch (IOException e) {
             System.err.println("ERROR");
             output = null;
-        } finally {
+        }
+        catch (InterruptedException e) {
+            output = "Execution was timed out";
+        }
+        finally {
             closeQuietly(stdOut);
             closeQuietly(stdErr);
             deleteQuietly(path);
@@ -109,8 +109,7 @@ public class Docker {
             return;
         try {
             closeable.close();
-        } catch (IOException e) {
-        }
+        } catch (IOException e) {}
     }
 
     private static void deleteQuietly(Path path) {
@@ -118,7 +117,6 @@ public class Docker {
             return;
         try {
             Files.deleteIfExists(path);
-        } catch (IOException e) {
-        }
+        } catch (IOException e) {}
     }
 }
