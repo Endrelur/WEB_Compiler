@@ -1,2 +1,2 @@
 cd image
-docker build . -t minideb-vm
+docker build . -t oving-image

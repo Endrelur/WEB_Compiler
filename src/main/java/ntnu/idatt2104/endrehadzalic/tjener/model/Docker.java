@@ -1,6 +1,8 @@
 package ntnu.idatt2104.endrehadzalic.tjener.model;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,8 +20,8 @@ public class Docker {
     public static final int WINDOWS                 = 0;
     public static final int LINUX                   = 1;
 
-    private static final String BASE_PATH           = "src/main/resources/docker/";
-    private static final String WINDOWS_RUN_SCRIPT  = BASE_PATH + "run.cmd";
+    private static final String BASE_PATH           = "/src/main/resources/docker/";
+    private static final String WINDOWS_RUN_SCRIPT  = BASE_PATH + "run.bat";
     private static final String LINUX_RUN_SCRIPT    = BASE_PATH + "run.sh";
 
     /**
@@ -100,6 +102,7 @@ public class Docker {
 
         return Optional.ofNullable(output);
     }
+
 
     private static void closeQuietly(Closeable closeable) {
         if (closeable == null)
