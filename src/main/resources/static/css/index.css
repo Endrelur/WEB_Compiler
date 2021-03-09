@@ -1,5 +1,10 @@
+html, body {
+    height: 100vh;
+
+}
+
 .page-wrapper {
-    display: grid;
+    display:  grid;
     grid-gap: 10px;
 
     grid-template-rows: 1fr 50px auto;
@@ -10,32 +15,41 @@
 }
 
 .page-wrapper > * {
-    margin: 0;
+    margin:  0;
     padding: 0;
 }
 
-
-#editor {
+.CodeMirror {
     grid-area: code-area;
+    height: 70vh;
 }
 
 #run-btn {
     grid-area: run-btn;
+    justify-self: center;
+    width: 95%;
+    height: 5vh;
 }
 
 #output {
-    grid-area: output;
-    min-height: 100px;
-    border: 1px solid black;
+    grid-area:  output;
+    height: 200px;
+    border:     1px solid black;
+    overflow: scroll;
 }
 
 
 @media (min-width: 700px) {
     .page-wrapper {
-        grid-template-rows: 1fr auto;
-        grid-template-columns: 1fr 50px;
+        grid-template-rows:     1fr auto;
+        grid-template-columns:  1fr 70px;
         grid-template-areas:
             "code-area code-area"
             "output run-btn ";
+    }
+    #run-btn {
+        height: 50px;
+        align-self: center;
+        justify-self: center;
     }
 }

@@ -29,6 +29,5 @@ public class MainController {
         System.out.println(cppSourceString);
         return webService.compileAndRun(cppSourceString).get();
     }
-
 }
 

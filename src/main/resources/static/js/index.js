@@ -1,7 +1,7 @@
 const serverRunPath = "http://localhost:8080/run";
 
-const runBtn = document.getElementById("run-btn");
 const outPut = document.getElementById("output");
+const runBtn = document.getElementById("run-btn");
 
 // Get editor and configure it
 const editor = CodeMirror(document.querySelector('#editor'), {
@@ -15,7 +15,7 @@ runBtn.onclick = function() {
     let data = editor.getValue();
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
-        output.innerHTML = "Output:\n" + xhr.response;
+        output.innerHTML = xhr.response;
     }
     xhr.open('POST', serverRunPath);
     xhr.setRequestHeader('Content-Type', 'text/plain');

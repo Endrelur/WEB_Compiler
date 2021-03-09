@@ -83,8 +83,10 @@ public class Docker {
             for (String line = stdErr.readLine(); line != null; line = stdErr.readLine())
                 result.append(line).append("\n");
 
+            System.out.println("Waiting...");
             //  Wait until the process has terminated.
             p.waitFor();
+            System.out.println("Finished...");
             // System.out.println("exit: " + process.exitValue());
             p.destroy();
 
