@@ -4,12 +4,14 @@ import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A class that is meant to take in runnable c++ code, execute it in a docker container and return the result.
@@ -18,10 +20,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class Docker {
 
-    private static final Logger logger = LoggerFactory.getLogger(Docker.class);
-
     public static final int WINDOWS = 0;
-    public static final int LINUX   = 1;
+    public static final int LINUX = 1;
+    private static final Logger logger = LoggerFactory.getLogger(Docker.class);
 
     /**
      * Checks the servers host-OS and returns a corresponding value.
@@ -50,13 +51,11 @@ public class Docker {
 
         if (os == WINDOWS) {
             logger.info("Returned a run command for Windows");
-            return new String[] {"cmd.exe", "/c", dockerCommand};
-        }
-        else if (os == LINUX) {
+            return new String[]{"cmd.exe", "/c", dockerCommand};
+        } else if (os == LINUX) {
             logger.info("Returned a run command for Linux");
-            return new String[] {"/bin/bash", "-c", dockerCommand};
-        }
-        else
+            return new String[]{"/bin/bash", "-c", dockerCommand};
+        } else
             throw new IllegalStateException("Unsupported OS");
     }
 
@@ -91,13 +90,13 @@ public class Docker {
      *
      * @param cppSourceCode the cpp source-code to be compiled
      */
-    public static Optional<String> executeInDocker(String cppSourceCode, long timeout) {
+    public static Optional<String> executeInDocker(String cppSourceCode) {
         logger.info("Initializing c++ code execution in docker");
 
-        Process p             = null;
+        Process p = null;
         BufferedReader stdOut = null;
         BufferedReader stdErr = null;
-        Path path             = null;
+        Path path = null;
 
         String output = null;
 
@@ -127,25 +126,26 @@ public class Docker {
                 result.append(line).append("\n");
 
             //  Wait until the process has terminated.
-            p.waitFor(timeout, TimeUnit.SECONDS);
-            output = result.toString() + "\n\n" + "Exit Code: " + p.exitValue();
-        }
-        catch (IOException e) {
+            p.waitFor();
+            if (p.exitValue() == 124) {
+                output = "Code timed out after 10s" + "\n\n" + "Exit Code: " + p.exitValue();
+            } else {
+                output = result.toString() + "\n\n" + "Exit Code: " + p.exitValue();
+            }
+
+        } catch (IOException e) {
             logger.error("Problem during execution of c++ code in docker container: " + e.toString());
             output = null;
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             output = "Error: Execution took too long. Process timed out";
-        }
-        finally {
+        } finally {
             logger.info("Cleaning up resources");
             try {
                 if (stdOut != null) stdOut.close();
                 if (stdErr != null) stdErr.close();
-                if (path != null)   Files.deleteIfExists(path);
-                if (p != null)      p.destroy();
-            }
-            catch (IOException e) {
+                if (path != null) Files.deleteIfExists(path);
+                if (p != null) p.destroy();
+            } catch (IOException e) {
                 logger.warn(e.toString());
             }
         }
@@ -163,11 +163,9 @@ public class Docker {
             p.waitFor();
             p.destroy();
             logger.info("Docker image initialization done");
-        }
-        catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             logger.error("Problem during initialization of docker images: " + e.toString());
-        }
-        finally {
+        } finally {
             if (p != null) p.destroy();
         }
 

@@ -11,7 +11,7 @@ public class WebService {
     private static final long TIMEOUT = 10;  // seconds
 
     public Optional<String> compileAndRun(String cppSourceCode) {
-        Optional<String> result = Docker.executeInDocker(cppSourceCode, TIMEOUT);
+        Optional<String> result = Docker.executeInDocker(cppSourceCode);
         return result.map(s -> s.replace("\n", "<br>"));
     }
 }

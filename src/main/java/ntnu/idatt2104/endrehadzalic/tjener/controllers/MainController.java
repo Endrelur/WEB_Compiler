@@ -4,7 +4,8 @@ import ntnu.idatt2104.endrehadzalic.tjener.service.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,8 +39,7 @@ public class MainController {
             String output = result.get();
             logger.info("The execution of the code resulted of a output of:\n " + output);
             return ResponseEntity.ok(output);
-        }
-        else {
+        } else {
             logger.warn("Internal Server Error");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
