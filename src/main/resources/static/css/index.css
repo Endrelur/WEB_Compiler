@@ -1,5 +1,7 @@
 html, body {
     height: 100vh;
+    box-sizing: content-box;
+    margin: 0;
 
 }
 
@@ -28,7 +30,7 @@ html, body {
     grid-area: run-btn;
     justify-self: center;
     width: 95%;
-    height: 5vh;
+    height: auto;
 }
 
 #output {
