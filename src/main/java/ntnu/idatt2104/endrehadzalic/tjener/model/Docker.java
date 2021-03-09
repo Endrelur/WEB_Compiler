@@ -1,13 +1,10 @@
 package ntnu.idatt2104.endrehadzalic.tjener.model;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.Closeable;
-
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,15 +14,15 @@ import java.util.Optional;
 
 public class Docker {
 
-    public static final int WINDOWS                 = 0;
-    public static final int LINUX                   = 1;
+    public static final int WINDOWS = 0;
+    public static final int LINUX = 1;
 
-    private static final String BASE_PATH           = "src/main/resources/docker/";
-    private static final String WINDOWS_RUN_SCRIPT  = BASE_PATH + "run.bat";
-    private static final String LINUX_RUN_SCRIPT    = BASE_PATH + "run.sh";
+    private static final String BASE_PATH = "src/main/resources/docker/";
+    private static final String WINDOWS_RUN_SCRIPT = BASE_PATH + "run.cmd";
+    private static final String LINUX_RUN_SCRIPT = BASE_PATH + "run.sh";
 
     /**
-     * @return  -1 if the identified OS is unsupported
+     * @return -1 if the identified OS is unsupported
      */
     private static int checkOS() {
         int os = -1;
@@ -36,19 +33,22 @@ public class Docker {
         return os;
     }
 
-    private static String[] getLaunchCommand() {
+    private static String[] getLaunchCommand(String cppPath) {
         int os = checkOS();
 
+        String dockerCommand = "docker run -i --rm oving-image < " + cppPath;
+
         if (os == WINDOWS)
-            return null;                                    // FIXME @Endre
+            return new String[]{"cmd.exe", "/c", dockerCommand};
         else if (os == LINUX)
-            return new String[]{ "sh", LINUX_RUN_SCRIPT };
+            return new String[]{"sh", dockerCommand};
         else
             throw new IllegalStateException("Unsupported OS");
     }
 
     /**
      * Returns null on server error
+     *
      * @param cppSourceCode the cpp source-code to be compiled
      */
     public static Optional<String> executeInDocker(String cppSourceCode) {
@@ -64,14 +64,14 @@ public class Docker {
             Files.write(path, cppSourceCode.getBytes(StandardCharsets.UTF_8));
 
             // Create docker launch command
-            String[] launchScript = getLaunchCommand();
-            String[] commands = { launchScript[0], launchScript[1], path.toAbsolutePath().toString() };
+            String[] commands = getLaunchCommand(path.toAbsolutePath().toString());
 
             // Launch docker
-            Process process = Runtime.getRuntime().exec(commands);
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process p = builder.start();
 
-            stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            stdErr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            stdOut = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            stdErr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
             StringBuilder result = new StringBuilder();
 
@@ -84,17 +84,15 @@ public class Docker {
                 result.append(line).append("\n");
 
             //  Wait until the process has terminated.
-            process.waitFor();
+            p.waitFor();
             // System.out.println("exit: " + process.exitValue());
-            process.destroy();
+            p.destroy();
 
             output = result.toString();
-        }
-        catch(IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             System.err.println("ERROR");
             output = null;
-        }
-        finally {
+        } finally {
             closeQuietly(stdOut);
             closeQuietly(stdErr);
             deleteQuietly(path);
@@ -109,7 +107,8 @@ public class Docker {
             return;
         try {
             closeable.close();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
     }
 
     private static void deleteQuietly(Path path) {
@@ -117,6 +116,7 @@ public class Docker {
             return;
         try {
             Files.deleteIfExists(path);
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
     }
 }
