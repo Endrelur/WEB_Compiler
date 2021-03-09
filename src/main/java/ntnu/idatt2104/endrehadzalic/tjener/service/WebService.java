@@ -8,15 +8,10 @@ import java.util.Optional;
 @Service
 public class WebService {
 
-    private static final long TIMEOUT = 30;  // seconds
+    private static final long TIMEOUT = 10;  // seconds
 
     public Optional<String> compileAndRun(String cppSourceCode) {
-        try {
-            return Docker.executeInDocker(cppSourceCode, TIMEOUT);
-        }
-        catch (Exception e) {
-            System.err.println("lol");
-            return Optional.ofNullable(null);
-        }
+        Optional<String> result = Docker.executeInDocker(cppSourceCode, TIMEOUT);
+        return result.map(s -> s.replace("\n", "<br>"));
     }
 }

@@ -71,13 +71,13 @@ public class Docker {
         String dockerBuildCommand = "docker build . -t oving-image";
 
         if (os == WINDOWS) {
-            ProcessBuilder builder = new ProcessBuilder(new String[]{"cmd.exe", "/c", dockerBuildCommand});
+            ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", dockerBuildCommand);
             builder.directory(new File("src/main/resources/docker/windowsimage"));
             logger.info("Building a docker image for Windows");
             return builder;
         }
         if (os == LINUX) {
-            ProcessBuilder builder = new ProcessBuilder(new String[]{"/bin/bash", "-c", dockerBuildCommand});
+            ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", dockerBuildCommand);
             builder.directory(new File("src/main/resources/docker/linuximage"));
             logger.info("Building a docker image for Linux");
             return builder;
@@ -93,7 +93,6 @@ public class Docker {
      */
     public static Optional<String> executeInDocker(String cppSourceCode, long timeout) {
         logger.info("Initializing c++ code execution in docker");
-        logger.info("Opening streams and creating a temporary c++ file");
 
         Process p             = null;
         BufferedReader stdOut = null;
@@ -129,22 +128,26 @@ public class Docker {
 
             //  Wait until the process has terminated.
             p.waitFor(timeout, TimeUnit.SECONDS);
-            int exitValue = p.exitValue();
-            output = "Exit Code: " + exitValue + "\n" + result.toString();
+            output = result.toString() + "\n\n" + "Exit Code: " + p.exitValue();
         }
         catch (IOException e) {
-            logger.error("Problem during execution of c++ code in docker container " + e.toString());
+            logger.error("Problem during execution of c++ code in docker container: " + e.toString());
             output = null;
         }
         catch (InterruptedException e) {
             output = "Error: Execution took too long. Process timed out";
         }
         finally {
-            logger.info("Closing streams and deleting temporary c++ file");
-            if (stdOut != null) closeQuietly(stdOut);
-            if (stdErr != null) closeQuietly(stdErr);
-            if (path != null)   deleteQuietly(path);
-            if (p != null)      p.destroy();
+            logger.info("Cleaning up resources");
+            try {
+                if (stdOut != null) stdOut.close();
+                if (stdErr != null) stdErr.close();
+                if (path != null)   Files.deleteIfExists(path);
+                if (p != null)      p.destroy();
+            }
+            catch (IOException e) {
+                logger.warn(e.toString());
+            }
         }
 
         return Optional.ofNullable(output);
@@ -154,33 +157,19 @@ public class Docker {
      * Method used for starting a OS-specific on the host server.
      */
     public static void startDockerImages() {
+        Process p = null;
         try {
-            ProcessBuilder builder = getDockerImageBuilder();
-            Process p = builder.start();
-
+            p = getDockerImageBuilder().start();
             p.waitFor();
             p.destroy();
-            logger.info("Docker image initializaion done");
-        } catch (IOException | InterruptedException e) {
+            logger.info("Docker image initialization done");
+        }
+        catch (IOException | InterruptedException e) {
             logger.error("Problem during initialization of docker images: " + e.toString());
         }
-
-    }
-
-
-    private static void closeQuietly(Closeable closeable) {
-        try {
-            closeable.close();
-        } catch (IOException e) {
-            logger.error(e.toString());
+        finally {
+            if (p != null) p.destroy();
         }
-    }
 
-    private static void deleteQuietly(Path path) {
-        try {
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            logger.error(e.toString());
-        }
     }
 }
