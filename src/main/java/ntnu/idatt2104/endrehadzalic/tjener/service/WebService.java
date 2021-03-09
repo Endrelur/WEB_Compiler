@@ -1,5 +1,6 @@
-package ntnu.idatt2104.endrehadzalic.tjener.model;
+package ntnu.idatt2104.endrehadzalic.tjener.service;
 
+import ntnu.idatt2104.endrehadzalic.tjener.model.Docker;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -7,7 +8,7 @@ import java.util.Optional;
 @Service
 public class WebService {
 
-    private static final long TIMEOUT = 30;     // seconds
+    private static final long TIMEOUT = 30;  // seconds
 
     public Optional<String> compileAndRun(String cppSourceCode) {
         try {
