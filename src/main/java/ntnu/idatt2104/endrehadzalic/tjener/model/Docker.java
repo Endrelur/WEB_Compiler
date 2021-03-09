@@ -23,43 +23,38 @@ public class Docker {
     private static final String LINUX_RUN_SCRIPT    = BASE_PATH + "run.sh";
 
     /**
-     * @return -1 if no known os was detected.
+     * @return  -1 if the identified OS is unsupported
      */
     private static int checkOS() {
         int os = -1;
-        if (SystemUtils.IS_OS_WINDOWS) {
+        if (SystemUtils.IS_OS_WINDOWS)
             os = WINDOWS;
-        }
-        else if (SystemUtils.IS_OS_LINUX) {
+        else if (SystemUtils.IS_OS_LINUX)
             os = LINUX;
-        }
-
         return os;
     }
 
     private static String[] getLaunchCommand() {
         int os = checkOS();
-        if (os == WINDOWS) {
-            return new String[]{"powershell.exe", WINDOWS_RUN_SCRIPT};        // FIXME
-        }
-        else if (os == LINUX) {
+
+        if (os == WINDOWS)
+            return null;                                    // FIXME @Endre
+        else if (os == LINUX)
             return new String[]{"sh", LINUX_RUN_SCRIPT};
-        }
-        else {
+        else
             throw new IllegalStateException("Unsupported OS");
-        }
     }
 
-    public static boolean buildImage() {
-        return true;
-    }
-
+    /**
+     * Returns null on server error
+     * @param cppSourceCode the cpp source-code to be compiled
+     */
     public static Optional<String> executeInDocker(String cppSourceCode) {
         BufferedReader stdOut = null;
         BufferedReader stdErr = null;
         Path path = null;
 
-        StringBuilder result = new StringBuilder();
+        String output = null;
 
         try {
             // Create a temp-file for holding the cpp source code
@@ -76,6 +71,8 @@ public class Docker {
             stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
             stdErr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
+            StringBuilder result = new StringBuilder();
+
             // Append output, if present
             for (String line = stdOut.readLine(); line != null; line = stdOut.readLine())
                 result.append(line).append("\n");
@@ -84,38 +81,38 @@ public class Docker {
             for (String line = stdErr.readLine(); line != null; line = stdErr.readLine())
                 result.append(line).append("\n");
 
-
             //  Wait until the process has terminated.
             process.waitFor();
             // System.out.println("exit: " + process.exitValue());
             process.destroy();
+
+            output = result.toString();
         }
         catch(IOException | InterruptedException e) {
-            result = null;
+            output = null;
         }
         finally {
             closeQuietly(stdOut);
-            closeQuietly(stdOut);
+            closeQuietly(stdErr);
             deleteQuietly(path);
         }
 
-        return Optional.ofNullable(result);
+        return Optional.ofNullable(output);
     }
 
     private static void closeQuietly(Closeable closeable) {
-        if (closeable == null) return;
-
+        if (closeable == null)
+            return;
         try {
             closeable.close();
-        }
-        catch (IOException e) {}
+        } catch (IOException e) {}
     }
 
     private static void deleteQuietly(Path path) {
-        if (path == null) return;
+        if (path == null)
+            return;
         try {
             Files.deleteIfExists(path);
-
         } catch (IOException e) {}
     }
 }

@@ -1,21 +1,18 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html>
+    <head>
+        <title>Cpp Compiler</title>
+        <!-- Code mirror for syntax highlighting and other text-editing features -->
+        <script type="text/javascript" src="webjars/codemirror/5.50.0/lib/codemirror.js"></script>
+        <script type="text/javascript" src="webjars/codemirror/5.50.0/mode/clike/clike.js"></script>
+        <link rel="stylesheet" href="webjars/codemirror/5.50.0/lib/codemirror.css"/>
+        <link rel="stylesheet" href="webjars/codemirror/5.50.0/theme/monokai.css" />
 
-<head>
-  <link rel="stylesheet" href="css/index.css">
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Getting started</title>
-
-</head>
-<div class="container">
-
-  <body>
-    <h1 id = "title">Code Runner</h1>
-    <textarea id="codeinput" name="codeinput"></textarea>
-    <button id="runbutton" type="button" onclick="alert('Hello world!')">Click Me!</button>
-    <textarea id="codeoutput" name="codeoutput" readonly=true ></textarea>
-    </form>
-  </body>
-</div>
-
+        <link rel="stylesheet" href="/css/index.css"/>
+        <script defer src="/js/index.js"></script>
+    </head>
+    <body>
+        <div id="my-div"></div>
+        <button id="run-btn">Run</button>
+        <p id="output">Test</p>
+    </body>
 </html>

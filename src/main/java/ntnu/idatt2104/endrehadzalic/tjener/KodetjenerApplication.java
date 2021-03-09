@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class KodetjenerApplication  {
 
 	public static void main(String[] args){
-		if (Docker.buildImage())
 		SpringApplication.run(KodetjenerApplication.class, args);
 	}
 
