@@ -1,5 +1,6 @@
-package ntnu.idatt2104.endrehadzalic.tjener.model;
+package ntnu.idatt2104.endrehadzalic.tjener.service;
 
+import ntnu.idatt2104.endrehadzalic.tjener.model.Docker;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
