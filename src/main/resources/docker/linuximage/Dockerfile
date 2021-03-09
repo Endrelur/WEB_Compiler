@@ -4,4 +4,4 @@ RUN pacman -Syuu --noconfirm
 
 RUN pacman -S --noconfirm gcc
 
-CMD gcc -x c++ - -o main && ./main
+CMD g++ -x c++ - -o main && ./main
