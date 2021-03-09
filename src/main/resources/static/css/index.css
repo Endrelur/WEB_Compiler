@@ -1,0 +1,30 @@
+.page-wrapper {
+    dispaly: grid;
+    grid-template-rows: 1fr 200px auto;
+    grid-template-areas:
+        "code-area"
+        "run-button"
+        "output";
+}
+
+#editor {
+    grid-area: code-area;
+}
+
+#run-btn {
+    grid-area: run-button;
+}
+
+#output {
+    grid-area: output;
+    border: 1px solid black;
+}
+
+
+@media (min-width: 700px) {
+    .page-wrapper {
+        grid-template-areas:
+        "code-area"
+        "run-button" "output";
+    }
+}

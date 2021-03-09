@@ -20,7 +20,7 @@ public class Docker {
     public static final int WINDOWS                 = 0;
     public static final int LINUX                   = 1;
 
-    private static final String BASE_PATH           = "/src/main/resources/docker/";
+    private static final String BASE_PATH           = "src/main/resources/docker/";
     private static final String WINDOWS_RUN_SCRIPT  = BASE_PATH + "run.bat";
     private static final String LINUX_RUN_SCRIPT    = BASE_PATH + "run.sh";
 
@@ -42,7 +42,7 @@ public class Docker {
         if (os == WINDOWS)
             return null;                                    // FIXME @Endre
         else if (os == LINUX)
-            return new String[]{"sh", LINUX_RUN_SCRIPT};
+            return new String[]{ "sh", LINUX_RUN_SCRIPT };
         else
             throw new IllegalStateException("Unsupported OS");
     }
