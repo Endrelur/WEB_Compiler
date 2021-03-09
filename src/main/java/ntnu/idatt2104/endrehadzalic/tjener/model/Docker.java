@@ -41,7 +41,7 @@ public class Docker {
         if (os == WINDOWS)
             return new String[]{"cmd.exe", "/c", dockerCommand};
         else if (os == LINUX)
-            return new String[]{"sh", dockerCommand};
+            return new String[]{"/bin/bash", "-c", dockerCommand};
         else
             throw new IllegalStateException("Unsupported OS");
     }
